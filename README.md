@@ -95,7 +95,6 @@ erDiagram
     USER {
       string id
       string email
-      ...
     }
     SESSION {
       string id
