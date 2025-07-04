@@ -99,7 +99,7 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 
 # Sesión Manager API
 
-API completa para manejo de sesiones con tokens JWT y refresh tokens usando NestJS, TypeORM y PostgreSQL.
+API completa para manejo de sesiones con tokens JWT y refresh tokens usando NestJS, TypeORM y PostgreSQL
 
 ## Características
 
