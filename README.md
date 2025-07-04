@@ -1,4 +1,4 @@
-# 🛡️ Gestión de Sesiones: ¡Tu Seguridad y Control en el Proyecto!
+# 🛡️ Gestión de sesiones.
 
 ¡Bienvenido! Aquí descubrirás cómo funciona la **gestión de sesiones** en este sistema, cómo se relaciona con los usuarios y por qué es clave para la seguridad y experiencia de tu app. 🚀
 
