@@ -15,6 +15,10 @@ export class SessionService {
     private jwtService: JwtService,
   ) {}
 
+  /**
+   * Crea una nueva sesión para el usuario, generando access y refresh tokens.
+   * Persiste la sesión en la base de datos con información de agente y dirección IP.
+   */
   async createSession(user: User, userAgent?: string, ipAddress?: string): Promise<{
     accessToken: string;
     refreshToken: string;
@@ -53,6 +57,10 @@ export class SessionService {
     };
   }
 
+  /**
+   * Renueva el access token usando un refresh token válido.
+   * Valida la sesión, su estado y expiración antes de emitir nuevos tokens.
+   */
   async refreshAccessToken(refreshTokenDto: RefreshTokenDto): Promise<{
     accessToken: string;
     refreshToken: string;
@@ -96,10 +104,17 @@ export class SessionService {
     };
   }
 
+  /**
+   * Desactiva (invalida) una sesión específica por su ID.
+   */
   async deactivateSession(sessionId: string): Promise<void> {
     await this.sessionRepository.update(sessionId, { isActive: false });
   }
 
+  /**
+   * Desactiva todas las sesiones activas de un usuario.
+   * Útil para logout global.
+   */
   async deactivateAllUserSessions(userId: string): Promise<void> {
     await this.sessionRepository.update(
       { userId, isActive: true },
@@ -107,6 +122,9 @@ export class SessionService {
     );
   }
 
+  /**
+   * Desactiva una sesión usando el refresh token asociado.
+   */
   async deactivateSessionByRefreshToken(refreshToken: string): Promise<void> {
     const session = await this.sessionRepository.findOne({
       where: { refreshToken },
@@ -117,6 +135,9 @@ export class SessionService {
     }
   }
 
+  /**
+   * Obtiene todas las sesiones activas de un usuario, ordenadas por último uso.
+   */
   async getActiveSessions(userId: string): Promise<Session[]> {
     return this.sessionRepository.find({
       where: { userId, isActive: true },
@@ -124,6 +145,9 @@ export class SessionService {
     });
   }
 
+  /**
+   * Valida una sesión por su ID, comprobando que esté activa y no expirada.
+   */
   async validateSession(sessionId: string): Promise<Session> {
     const session = await this.sessionRepository.findOne({
       where: { id: sessionId, isActive: true },
@@ -142,6 +166,10 @@ export class SessionService {
     return session;
   }
 
+  /**
+   * Limpia (desactiva) todas las sesiones expiradas activas.
+   * Puede ser ejecutado automáticamente por el sistema.
+   */
   async cleanupExpiredSessions(): Promise<void> {
     const expiredSessions = await this.sessionRepository.find({
       where: {

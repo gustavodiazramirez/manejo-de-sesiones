@@ -13,6 +13,10 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
+  /**
+   * Crea un nuevo usuario en la base de datos.
+   * Valida que el email no esté registrado previamente y encripta la contraseña antes de guardar.
+   */
   async create(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.userRepository.findOne({
       where: { email: createUserDto.email },
@@ -32,18 +36,30 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
+  /**
+   * Busca un usuario por su email.
+   * Retorna el usuario o null si no existe.
+   */
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { email },
     });
   }
 
+  /**
+   * Busca un usuario por su ID.
+   * Retorna el usuario o null si no existe.
+   */
   async findById(id: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id },
     });
   }
 
+  /**
+   * Valida las credenciales de un usuario durante el login.
+   * Verifica email, contraseña y estado activo del usuario.
+   */
   async validateUser(loginUserDto: LoginUserDto): Promise<User> {
     const user = await this.findByEmail(loginUserDto.email);
     
@@ -64,18 +80,28 @@ export class UserService {
     return user;
   }
 
+  /**
+   * Actualiza la fecha del último login exitoso del usuario.
+   */
   async updateLastLogin(userId: string): Promise<void> {
     await this.userRepository.update(userId, {
       lastLoginAt: new Date(),
     });
   }
 
+  /**
+   * Obtiene todos los usuarios registrados (campos seleccionados).
+   */
   async findAll(): Promise<User[]> {
     return this.userRepository.find({
       select: ['id', 'email', 'firstName', 'lastName', 'role', 'isActive', 'lastLoginAt', 'createdAt'],
     });
   }
 
+  /**
+   * Actualiza los datos de un usuario existente.
+   * Lanza excepción si el usuario no existe.
+   */
   async update(id: string, updateData: Partial<User>): Promise<User> {
     const user = await this.findById(id);
     if (!user) {
@@ -90,6 +116,10 @@ export class UserService {
     return updatedUser;
   }
 
+  /**
+   * Elimina un usuario por su ID.
+   * Lanza excepción si el usuario no existe.
+   */
   async delete(id: string): Promise<void> {
     const user = await this.findById(id);
     if (!user) {
