@@ -1,167 +1,117 @@
-# Sesión Manager API
+# 🛡️ Gestión de Sesiones: ¡Tu Seguridad y Control en el Proyecto!
 
-API completa para manejo de sesiones con tokens JWT y refresh tokens usando NestJS, TypeORM y PostgreSQL
+¡Bienvenido! Aquí descubrirás cómo funciona la **gestión de sesiones** en este sistema, cómo se relaciona con los usuarios y por qué es clave para la seguridad y experiencia de tu app. 🚀
 
-## Características
+---
 
-- ✅ Registro y autenticación de usuarios
-- ✅ Manejo de sesiones con tokens JWT
-- ✅ Refresh tokens para renovar sesiones
-- ✅ Gestión de múltiples sesiones por usuario
-- ✅ Limpieza automática de sesiones expiradas
-- ✅ Documentación con Swagger
-- ✅ Validación de datos con class-validator
-- ✅ Configuración con variables de entorno
-- ✅ Estructura modular organizada
+## 🗄️ ¿Qué es la tabla `session`?
+La tabla `session` es como el registro de entradas y salidas de los usuarios. Cada vez que alguien inicia sesión, se crea una "ficha" que guarda:
 
-## Estructura del Proyecto
+- 🆔 **id**: Identificador único de la sesión.
+- 👤 **userId**: ¿A qué usuario pertenece esta sesión? (relación con la tabla `user`).
+- 🔑 **refreshToken**: Token especial para renovar el acceso sin volver a loguearse.
+- 🕒 **createdAt**: Cuándo se creó la sesión.
+- ⏰ **expiresAt**: Cuándo expira la sesión.
+- ✅ **isActive**: ¿Sigue activa esta sesión?
 
-```
-src/
-├── config/
-│   ├── database.config.ts    # Configuración de TypeORM
-│   └── jwt.config.ts         # Configuración de JWT
-├── user/
-│   ├── entities/
-│   │   └── user.entity.ts    # Entidad Usuario
-│   ├── dto/
-│   │   ├── create-user.dto.ts
-│   │   └── login-user.dto.ts
-│   ├── user.controller.ts    # Controlador de usuarios
-│   ├── user.service.ts       # Servicio de usuarios
-│   └── user.module.ts        # Módulo de usuarios
-├── session/
-│   ├── entities/
-│   │   └── session.entity.ts # Entidad Sesión
-│   ├── dto/
-│   │   └── refresh-token.dto.ts
-│   ├── session.controller.ts # Controlador de sesiones
-│   ├── session.service.ts    # Servicio de sesiones
-│   └── session.module.ts     # Módulo de sesiones
-├── app.module.ts             # Módulo principal
-└── main.ts                   # Punto de entrada
-```
+Así, puedes tener varias sesiones activas (por ejemplo, en tu compu y tu celular al mismo tiempo).
 
-## Instalación
+---
 
-1. **Clonar el repositorio**
-```bash
-git clone <tu-repositorio>
-cd sesion-manager
-```
+## 🔗 Relación con la entidad `User`
+Cada sesión está conectada a un usuario. Esto permite:
+- Ver todas las sesiones activas de un usuario 👀
+- Cerrar todas las sesiones de un usuario (logout global) 🔒
+- Eliminar o limpiar sesiones específicas o expiradas 🧹
 
-2. **Instalar dependencias**
-```bash
-npm install
-```
+**¡Un usuario puede tener varias sesiones activas a la vez!**
 
-3. **Configurar variables de entorno**
-```bash
-cp env.example .env
-```
+---
 
-Editar el archivo `.env` con tus configuraciones:
-```env
-# Base de Datos
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=tu_password
-DB_NAME=sesion_manager
-DB_SYNC=true
+## ⚙️ Servicios principales de sesión
 
-# JWT
-JWT_SECRET=tu-super-secreto-jwt
-JWT_REFRESH_SECRET=tu-super-secreto-refresh-jwt
-```
+### 1️⃣ Renovar access token (`POST /sessions/refresh`)
+- 🔄 Usa el `refreshToken` para obtener un nuevo access token sin volver a poner la contraseña.
+- Solo funciona si la sesión está activa y no ha expirado.
 
-4. **Configurar PostgreSQL**
-- Crear base de datos: `sesion_manager`
-- Asegurar que las credenciales en `.env` sean correctas
+**🧩 Caso hipotético:**
+> Un usuario está usando la app y, después de un tiempo, su access token expira (por seguridad). Cuando intenta hacer una acción protegida, la app detecta el error de expiración y automáticamente (sin que el usuario lo note) envía el refresh token al backend para obtener un nuevo access token y continuar la experiencia sin interrupciones.
 
-5. **Ejecutar la aplicación**
-```bash
-# Desarrollo
-npm run start:dev
+### 2️⃣ Cerrar sesión (`POST /sessions/logout`)
+- 🚪 Cierra una sesión específica (por ejemplo, si cierras sesión en un dispositivo).
+- Invalida el `refreshToken` y marca la sesión como inactiva.
 
-# Producción
-npm run build
-npm run start:prod
-```
+**🧩 Caso hipotético:**
+> El usuario hace clic en "Cerrar sesión" en la app web o móvil. La app envía el refresh token de la sesión actual al backend para invalidarla y cerrar la sesión en ese dispositivo.
 
-## Endpoints de la API
+### 3️⃣ Cerrar todas las sesiones (`POST /sessions/logout-all`)
+- 💣 Cierra todas las sesiones activas de un usuario (logout global).
+- Útil si el usuario quiere salir de todos los dispositivos.
 
-### Usuarios
+**🧩 Caso hipotético:**
+> El usuario nota actividad sospechosa en su cuenta y decide cerrar sesión en todos los dispositivos desde la sección de seguridad de su perfil. La app envía su userId y el backend cierra todas sus sesiones activas.
 
-- `POST /users/register` - Registrar nuevo usuario
-- `POST /users/login` - Iniciar sesión
-- `GET /users` - Obtener todos los usuarios
-- `GET /users/:id` - Obtener usuario por ID
-- `PUT /users/:id` - Actualizar usuario
-- `DELETE /users/:id` - Eliminar usuario
+### 4️⃣ Obtener sesiones activas (`GET /sessions/user/{userId}`)
+- 📋 Muestra todas las sesiones activas de un usuario.
 
-### Sesiones
+**🧩 Caso hipotético:**
+> En la sección de "Dispositivos conectados" de la app, el usuario puede ver desde dónde ha iniciado sesión y en qué dispositivos sigue conectado. Esto se logra consultando este endpoint.
 
-- `POST /sessions/refresh` - Renovar access token
-- `POST /sessions/logout` - Cerrar sesión
-- `POST /sessions/logout-all` - Cerrar todas las sesiones
-- `GET /sessions/user/:userId` - Obtener sesiones activas
-- `DELETE /sessions/:sessionId` - Eliminar sesión específica
-- `POST /sessions/cleanup` - Limpiar sesiones expiradas
+### 5️⃣ Eliminar sesión específica (`DELETE /sessions/{sessionId}`)
+- 🗑️ Elimina una sesión concreta (por seguridad o administración).
 
-## Flujo de Autenticación
+**🧩 Caso hipotético:**
+> El usuario ve que hay una sesión activa en un dispositivo que no reconoce y decide eliminarla desde la app, seleccionando la sesión y enviando la petición para eliminarla.
 
-1. **Registro**: Usuario se registra con email y contraseña
-2. **Login**: Usuario inicia sesión y recibe access token + refresh token
-3. **Acceso**: Usar access token en header `Authorization: Bearer <token>`
-4. **Renovación**: Cuando el access token expira, usar refresh token para obtener nuevos tokens
-5. **Logout**: Invalidar refresh token para cerrar sesión
+### 6️⃣ Limpiar sesiones expiradas (`POST /sessions/cleanup`)
+- 🧹 Borra todas las sesiones que ya expiraron, manteniendo la base de datos limpia.
 
-## Documentación
+**🧩 Caso hipotético:**
+> El sistema ejecuta automáticamente (por ejemplo, con un cron job) esta petición cada noche para eliminar todas las sesiones que ya expiraron, optimizando el rendimiento y la seguridad.
 
-La documentación interactiva está disponible en:
-- **Swagger UI**: `http://localhost:3000/api`
+---
 
-## Variables de Entorno
+## 🔄 Flujo típico de autenticación y manejo de sesión
 
-| Variable | Descripción | Valor por defecto |
-|----------|-------------|-------------------|
-| `DB_HOST` | Host de PostgreSQL | localhost |
-| `DB_PORT` | Puerto de PostgreSQL | 5432 |
-| `DB_USERNAME` | Usuario de PostgreSQL | postgres |
-| `DB_PASSWORD` | Contraseña de PostgreSQL | - |
-| `DB_NAME` | Nombre de la base de datos | sesion_manager |
-| `DB_SYNC` | Sincronizar esquemas | false |
-| `JWT_SECRET` | Secreto para JWT | - |
-| `JWT_REFRESH_SECRET` | Secreto para refresh tokens | - |
-| `JWT_EXPIRES_IN` | Expiración del access token | 15m |
-| `JWT_REFRESH_EXPIRES_IN` | Expiración del refresh token | 7d |
+1. **Login:** El usuario inicia sesión y se crea una nueva sesión con un refresh token. ✨
+2. **Renovación:** Cuando el access token expira, el usuario puede renovarlo usando el refresh token. 🔄
+3. **Logout:** El usuario puede cerrar una sesión específica o todas sus sesiones. 🚪
+4. **Limpieza:** El sistema puede limpiar sesiones expiradas automáticamente. 🧹
 
-## Seguridad
+---
 
-- ✅ Contraseñas hasheadas con bcrypt
-- ✅ Tokens JWT con expiración
-- ✅ Refresh tokens únicos por sesión
-- ✅ Validación de datos de entrada
-- ✅ Limpieza automática de sesiones expiradas
-- ✅ Soporte para múltiples sesiones por usuario
+## 🛡️ Seguridad
+- Los refresh tokens se guardan de forma segura y se invalidan al cerrar sesión. 🔐
+- No se permite renovar tokens con sesiones expiradas o inactivas. 🚫
+- Cada usuario puede tener múltiples sesiones activas, pero cada sesión es única y controlada. 🧑‍💻
 
-## Scripts Disponibles
+---
 
-```bash
-npm run start:dev    # Desarrollo con hot reload
-npm run build        # Compilar para producción
-npm run start:prod   # Ejecutar en producción
-npm run test         # Ejecutar tests
-npm run lint         # Linting del código
+## 📊 Diagrama de relación
+
+```mermaid
+erDiagram
+    USER ||--o{ SESSION : tiene
+    USER {
+      string id
+      string email
+      ...
+    }
+    SESSION {
+      string id
+      string refreshToken
+      datetime createdAt
+      datetime expiresAt
+      boolean isActive
+      string userId
+    }
 ```
 
-## Tecnologías Utilizadas
+---
 
-- **NestJS** - Framework de Node.js
-- **TypeORM** - ORM para TypeScript
-- **PostgreSQL** - Base de datos
-- **JWT** - Autenticación con tokens
-- **bcryptjs** - Hash de contraseñas
-- **class-validator** - Validación de datos
-- **Swagger** - Documentación de API
+## 📝 Resumen
+La tabla de sesiones es el corazón del control de acceso: permite saber quién está conectado, desde dónde, y gestionar la seguridad de todos los usuarios. ¡Así tu app es más segura, flexible y fácil de administrar! 🎉
+
+---
+
+## ✍️ Desarrollado por Gustavo Díaz 
