@@ -1,0 +1,124 @@
+{
+  "info": {
+    "name": "Sesion Manager",
+    "_postman_id": "sesion-manager-collection",
+    "description": "Colección de endpoints para manejo de usuarios y sesiones",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Registrar nuevo usuario",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"usuario@correo.com\",\n  \"password\": \"123456\",\n  \"firstName\": \"Nombre\",\n  \"lastName\": \"Apellido\",\n  \"role\": \"user\"\n}"
+        },
+        "url": { "raw": "http://localhost:3000/users/register", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["users", "register"] }
+      }
+    },
+    {
+      "name": "Iniciar sesión",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"usuario@correo.com\",\n  \"password\": \"123456\"\n}"
+        },
+        "url": { "raw": "http://localhost:3000/users/login", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["users", "login"] }
+      }
+    },
+    {
+      "name": "Obtener todos los usuarios",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:3000/users", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["users"] }
+      }
+    },
+    {
+      "name": "Obtener usuario por ID",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:3000/users/{{userId}}", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["users", "{{userId}}"] }
+      }
+    },
+    {
+      "name": "Actualizar usuario",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"nuevo@correo.com\",\n  \"firstName\": \"NuevoNombre\",\n  \"lastName\": \"NuevoApellido\",\n  \"role\": \"user\"\n}"
+        },
+        "url": { "raw": "http://localhost:3000/users/{{userId}}", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["users", "{{userId}}"] }
+      }
+    },
+    {
+      "name": "Eliminar usuario",
+      "request": {
+        "method": "DELETE",
+        "url": { "raw": "http://localhost:3000/users/{{userId}}", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["users", "{{userId}}"] }
+      }
+    },
+    {
+      "name": "Renovar access token",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+        },
+        "url": { "raw": "http://localhost:3000/sessions/refresh", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["sessions", "refresh"] }
+      }
+    },
+    {
+      "name": "Cerrar sesión",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+        },
+        "url": { "raw": "http://localhost:3000/sessions/logout", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["sessions", "logout"] }
+      }
+    },
+    {
+      "name": "Cerrar todas las sesiones",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{userId}}\"\n}"
+        },
+        "url": { "raw": "http://localhost:3000/sessions/logout-all", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["sessions", "logout-all"] }
+      }
+    },
+    {
+      "name": "Obtener sesiones activas del usuario",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:3000/sessions/user/{{userId}}", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["sessions", "user", "{{userId}}"] }
+      }
+    },
+    {
+      "name": "Eliminar sesión específica",
+      "request": {
+        "method": "DELETE",
+        "url": { "raw": "http://localhost:3000/sessions/{{sessionId}}", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["sessions", "{{sessionId}}"] }
+      }
+    },
+    {
+      "name": "Limpiar sesiones expiradas",
+      "request": {
+        "method": "POST",
+        "url": { "raw": "http://localhost:3000/sessions/cleanup", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["sessions", "cleanup"] }
+      }
+    }
+  ]
+} 
