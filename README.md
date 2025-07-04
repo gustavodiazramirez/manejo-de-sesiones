@@ -95,14 +95,27 @@ erDiagram
     USER {
       string id
       string email
+      string password
+      string firstName
+      string lastName
+      enum role
+      boolean isActive
+      datetime lastLoginAt
+      datetime createdAt
+      datetime updatedAt
     }
     SESSION {
       string id
-      string refreshToken
-      datetime createdAt
-      datetime expiresAt
-      boolean isActive
       string userId
+      string refreshToken
+      string accessToken
+      string userAgent
+      string ipAddress
+      boolean isActive
+      datetime expiresAt
+      datetime lastUsedAt
+      datetime createdAt
+      datetime updatedAt
     }
 ```
 
