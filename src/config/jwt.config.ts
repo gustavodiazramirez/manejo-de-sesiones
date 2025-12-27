@@ -11,4 +11,4 @@ export const getJwtConfig = (configService: ConfigService): JwtModuleOptions => 
 export const getRefreshTokenConfig = (configService: ConfigService) => ({
   secret: configService.get<string>('JWT_REFRESH_SECRET', 'tu-super-secreto-refresh-jwt-aqui'),
   expiresIn: configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d'), // Refresh token
-}); 
+});

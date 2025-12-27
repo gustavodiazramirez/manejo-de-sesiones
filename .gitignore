@@ -3,14 +3,16 @@
 /node_modules
 /build
 
-# Logs
-logs
+# Ignorar archivos de log pero NO la carpeta logs/
 *.log
 npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+
+# Permitir la carpeta logs/ 
+!logs/**
 
 # OS
 .DS_Store
@@ -41,7 +43,7 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
-
+.env.docker
 # temp directory
 .temp
 .tmp
@@ -54,3 +56,7 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Compiled Python files
+__pycache__/
+*.pyc

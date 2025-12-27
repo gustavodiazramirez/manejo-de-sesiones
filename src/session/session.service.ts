@@ -24,24 +24,16 @@ export class SessionService {
     refreshToken: string;
     sessionId: string;
   }> {
-    // Generar tokens
-    const accessToken = this.jwtService.sign({
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    });
-
     const refreshToken = uuidv4();
 
     // Calcular fecha de expiración (7 días)
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
 
-    // Crear sesión en base de datos
+    // Crear sesión en base de datos primero para obtener el ID
     const session = this.sessionRepository.create({
       userId: user.id,
       refreshToken,
-      accessToken,
       userAgent,
       ipAddress,
       expiresAt,
@@ -49,6 +41,14 @@ export class SessionService {
     });
 
     await this.sessionRepository.save(session);
+
+    // Generar token con el sessionId incluido
+    const accessToken = this.jwtService.sign({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      sessionId: session.id,
+    });
 
     return {
       accessToken,
@@ -79,18 +79,18 @@ export class SessionService {
       throw new UnauthorizedException('Refresh token expirado');
     }
 
-    // Generar nuevo access token
+    // Generar nuevo access token con sessionId
     const newAccessToken = this.jwtService.sign({
       sub: session.user.id,
       email: session.user.email,
       role: session.user.role,
+      sessionId: session.id,
     });
 
     // Generar nuevo refresh token
     const newRefreshToken = uuidv4();
 
     // Actualizar sesión
-    session.accessToken = newAccessToken;
     session.refreshToken = newRefreshToken;
     session.lastUsedAt = new Date();
     session.expiresAt = new Date();
@@ -171,12 +171,12 @@ export class SessionService {
    * Puede ser ejecutado automáticamente por el sistema.
    */
   async cleanupExpiredSessions(): Promise<void> {
-    const expiredSessions = await this.sessionRepository.find({
-      where: {
-        expiresAt: new Date(),
-        isActive: true,
-      },
-    });
+    const now = new Date();
+    const expiredSessions = await this.sessionRepository
+      .createQueryBuilder('session')
+      .where('session.expiresAt < :now', { now })
+      .andWhere('session.isActive = :isActive', { isActive: true })
+      .getMany();
 
     for (const session of expiredSessions) {
       await this.deactivateSession(session.id);

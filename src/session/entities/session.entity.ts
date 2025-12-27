@@ -13,9 +13,6 @@ export class Session {
   refreshToken: string;
 
   @Column({ nullable: true })
-  accessToken: string;
-
-  @Column({ nullable: true })
   userAgent: string;
 
   @Column({ nullable: true })

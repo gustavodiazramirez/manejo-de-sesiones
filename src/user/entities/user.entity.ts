@@ -2,8 +2,8 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { Session } from '../../session/entities/session.entity';
 
 export enum UserRole {
-  USER = 'user',
   ADMIN = 'admin',
+  USER = 'usuario',
 }
 
 @Entity('users')
@@ -20,7 +20,7 @@ export class User {
   @Column()
   firstName: string;
 
-  @Column()
+  @Column({ nullable: true })
   lastName: string;
 
   @Column({
@@ -42,7 +42,6 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // Relaciones
   @OneToMany(() => Session, session => session.user)
   sessions: Session[];
 } 

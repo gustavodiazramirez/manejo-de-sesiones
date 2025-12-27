@@ -1,35 +1,28 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-
+import * as bodyParser from 'body-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Configuración de validación global
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
   // Configuración de CORS
   app.enableCors();
 
-  // Configuración de Swagger
-  const config = new DocumentBuilder()
-    .setTitle('Sesión Manager API')
-    .setDescription('API para manejo de sesiones con tokens y refresh tokens')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  // Para que se puedan importar registros grandes de la base estadística
+  app.use(bodyParser.json({ limit: '200mb' }));
+  app.use(bodyParser.urlencoded({ limit: '200mb', extended: true }));
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`Aplicación ejecutándose en: http://localhost:${port}`);
-  console.log(`Documentación Swagger en: http://localhost:${port}/api`);
+  console.log(`Aplicación corriendo en el puerto ${port}`, 'Inicialización');
 }
 bootstrap();

@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      TZ: America/Santiago
+      PGTZ: America/Santiago
+    ports:
+      - ${DB_PORT}:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  backend:
+    build: .
+    restart: always
+    ports:
+      - ${BACKEND_PORT}:3000
+    environment:
+      - DB_ENVIRONMENT=docker
+      - NODE_ENV=development
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    networks:
+      - backend
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
+
+networks:
+  backend:
+    driver: bridge

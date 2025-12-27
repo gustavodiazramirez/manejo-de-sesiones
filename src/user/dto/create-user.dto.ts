@@ -13,7 +13,8 @@ export class CreateUserDto {
   firstName: string;
 
   @IsString()
-  lastName: string;
+  @IsOptional()
+  lastName?: string;
 
   @IsOptional()
   @IsEnum(UserRole)
